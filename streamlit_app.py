@@ -38,9 +38,9 @@ if search_query:
             st.text(f"Year: {song['year']}")
             st.text(f"Views: {song['views']:,}")
 
-            # Display profanity information, showing a list of unique detected profane words
+            # Display profanity information, showing only unique profane words
             profane_words = song['profanity detected'].split(", ")
-            unique_profane_words = sorted(set(profane_words))  # Remove duplicates and sort
+            unique_profane_words = set(profane_words)  # Remove duplicates using set
             profane_word_list = ", ".join(unique_profane_words) if unique_profane_words else "No profane words detected"
             st.text(f"Profane words detected: {profane_word_list}")
             st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
@@ -52,4 +52,6 @@ if search_query:
             st.text(f"Sentiment score: {song['sentiment_score']} ({sentiment})")
 
     else:
+        st.error("No song found with that title. Please try again.")
+
         st.error("No song found with that title. Please try again.")
