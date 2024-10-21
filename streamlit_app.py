@@ -1,60 +1,55 @@
 import streamlit as st
 import pandas as pd
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-# Load the CSV data
-df = pd.read_csv('rap_songs.csv')
+# Load the dataset
+df = pd.read_csv('rap_songs_with_sentiment_updated.csv')
 
-# Function to calculate profanity rating based on percentiles
-def get_profanity_rating(weight, percentile_25, percentile_50, percentile_75):
-    if weight < percentile_25:
-        return "Low"
-    elif percentile_25 <= weight < percentile_50:
-        return "Moderate"
-    elif percentile_50 <= weight < percentile_75:
-        return "High"
+# Function to get percentile-based profanity rating
+def get_profanity_rating(profanity_weighting, p25, p50, p75):
+    if profanity_weighting <= p25:
+        return 'Low profanity'
+    elif profanity_weighting <= p50:
+        return 'Moderate profanity'
+    elif profanity_weighting <= p75:
+        return 'High profanity'
     else:
-        return "Very High"
+        return 'Very High profanity'
 
-# Sentiment analyzer setup
-analyzer = SentimentIntensityAnalyzer()
-
-def analyze_sentiment(lyrics):
-    sentiment_score = analyzer.polarity_scores(lyrics)
-    if sentiment_score['compound'] >= 0.05:
-        return 'Positive'
-    elif sentiment_score['compound'] <= -0.05:
-        return 'Negative'
-    else:
-        return 'Neutral'
+# Calculate percentiles for profanity weighting
+p25 = df['profanity weighting (%)'].quantile(0.25)
+p50 = df['profanity weighting (%)'].quantile(0.50)
+p75 = df['profanity weighting (%)'].quantile(0.75)
 
 # Title of the app
-st.title("Rap Song Search")
+st.title("Rap Song Profanity & Sentiment Analyzer")
 
-# Create a search bar
-song_name_input = st.text_input("Search for a song by name")
+# Search bar for song title
+search_query = st.text_input("Search for a rap song by title")
 
-# Display song information if found
-if song_name_input:
-    # Find song(s) based on the input
-    search_results = df[df['Song Name'].str.contains(song_name_input, case=False, na=False)]
+if search_query:
+    # Filter the dataframe for the searched song
+    song_data = df[df['title'].str.contains(search_query, case=False, na=False)]
 
-    if not search_results.empty:
-        for index, row in search_results.iterrows():
-            st.subheader(f"Song: {row['Song Name']}")
-            st.write(f"Lyrics: {row['Lyrics']}")
-            st.write(f"Topics: {', '.join(eval(row['Topics']))}")
-            st.write(f"Profanity List: {', '.join(eval(row['Profanity List']))}")
-            
-            # Calculate the profanity rating based on percentiles
-            profanity_percentiles = df['Profanity Weighting'].quantile([0.25, 0.50, 0.75])
-            profanity_rating = get_profanity_rating(row['Profanity Weighting'], 
-                                                    profanity_percentiles[0.25], 
-                                                    profanity_percentiles[0.50], 
-                                                    profanity_percentiles[0.75])
-            st.write(f"Profanity Rating: {profanity_rating}")
-            
-            # Display sentiment score
-            sentiment_score = analyze_sentiment(row['Lyrics'])
-            st.write(f
+    if not song_data.empty:
+        # Display results for each matching song
+        for index, song in song_data.iterrows():
+            st.subheader(f"Song: {song['title']}")
+            st.text(f"Artist: {song['artist']}")
+            st.text(f"Year: {song['year']}")
+            st.text(f"Views: {song['views']:,}")
 
+            # Display profanity information
+            st.text(f"Profane words detected: {song['profanity detected']}")
+            st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
+            rating = get_profanity_rating(song['profanity weighting (%)'], p25, p50, p75)
+            st.text(f"Profanity rating: {rating}")
+
+            # Display sentiment information
+            sentiment = "Positive" if song['sentiment_score'] > 0 else "Negative"
+            st.text(f"Sentiment score: {song['sentiment_score']} ({sentiment})")
+
+            # Display topics
+            st.text(f"Topics: {song['Topic']}")
+
+    else:
+        st.error("No song found with that title. Please try again.")
