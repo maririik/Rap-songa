@@ -38,10 +38,11 @@ if search_query:
             st.text(f"Year: {song['year']}")
             st.text(f"Views: {song['views']:,}")
 
-            # Display profanity information, showing only the first instance of detected profane words
+            # Display profanity information, showing a list of unique detected profane words
             profane_words = song['profanity detected'].split(", ")
-            first_profane_word = profane_words[0] if profane_words else "No profane words detected"
-            st.text(f"First profane word detected: {first_profane_word}")
+            unique_profane_words = sorted(set(profane_words))  # Remove duplicates and sort
+            profane_word_list = ", ".join(unique_profane_words) if unique_profane_words else "No profane words detected"
+            st.text(f"Profane words detected: {profane_word_list}")
             st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
             rating = get_profanity_rating(song['profanity weighting (%)'], p25, p50, p75)
             st.text(f"Profanity rating: {rating}")
