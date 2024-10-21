@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 
-# Load the dataset
-df = pd.read_csv('rap_songs_with_sentiment_updated.csv')
+# Load the dataset directly from GitHub
+url = 'https://raw.githubusercontent.com/your-username/your-repository/main/rap_songs_with_sentiment_updated.csv'
+df = pd.read_csv(url)
 
 # Function to get percentile-based profanity rating
 def get_profanity_rating(profanity_weighting, p25, p50, p75):
@@ -14,6 +15,17 @@ def get_profanity_rating(profanity_weighting, p25, p50, p75):
         return 'High profanity'
     else:
         return 'Very High profanity'
+
+# Function to extract unique profane words for each song
+def get_unique_profanities(profanity_list):
+    if isinstance(profanity_list, str):
+        # Convert the string representation of the list into an actual list
+        profanity_words = eval(profanity_list)
+        return list(set(profanity_words))
+    return []
+
+# Apply the function to get unique profane words
+df['unique_profanities'] = df['profanity detected'].apply(get_unique_profanities)
 
 # Calculate percentiles for profanity weighting
 p25 = df['profanity weighting (%)'].quantile(0.25)
@@ -39,7 +51,7 @@ if search_query:
             st.text(f"Views: {song['views']:,}")
 
             # Display profanity information
-            st.text(f"Profane words detected: {song['profanity detected']}")
+            st.text(f"Profane words detected: {song['unique_profanities']}")
             st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
             rating = get_profanity_rating(song['profanity weighting (%)'], p25, p50, p75)
             st.text(f"Profanity rating: {rating}")
@@ -50,6 +62,7 @@ if search_query:
 
             # Display topics
             st.text(f"Topics: {song['Topic']}")
-
     else:
         st.error("No song found with that title. Please try again.")
+else:
+    st.info("Please enter a song title to search.")
