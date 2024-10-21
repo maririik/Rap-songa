@@ -36,7 +36,6 @@ if search_query:
             st.subheader(f"Song: {song['title']}")
             st.text(f"Artist: {song['artist']}")
             st.text(f"Year: {song['year']}")
-            st.text(f"Views: {song['views']:,}")
 
             # Display profanity information (without listing the specific words)
             st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
@@ -49,3 +48,4 @@ if search_query:
 
     else:
         st.error("No song found with that title. Please try again.")
+
