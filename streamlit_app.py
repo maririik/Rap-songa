@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # Load the dataset directly from GitHub
-url = 'https://raw.githubusercontent.com/your-username/your-repository/main/rap_songs_with_sentiment_updated.csv'
+url = 'https://blank-app-y3xmzfrp2f.streamlit.app/'
 df = pd.read_csv(url)
 
 # Function to get percentile-based profanity rating
