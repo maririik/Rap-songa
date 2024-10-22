@@ -39,8 +39,9 @@ if search_query:
             st.text(f"Year: {song['year']}")
             st.text(f"Views: {song['views']:,}")
 
-            # Display profanity information
-            st.text(f"Profane words detected: {song['profanity detected']}")
+            # Remove duplicates from the list of profane words
+            detected_profanity = set(song['profanity detected'].split())
+            st.text(f"Profane words detected: {', '.join(detected_profanity)}")
             st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
             rating = get_profanity_rating(song['profanity weighting (%)'], p25, p50, p75)
             st.text(f"Profanity rating: {rating}")
@@ -48,9 +49,6 @@ if search_query:
             # Display sentiment information
             sentiment = "Positive" if song['sentiment_score'] > 0 else "Negative"
             st.text(f"Sentiment score: {song['sentiment_score']} ({sentiment})")
-
-            # Display topics
-            st.text(f"Topics: {song['Topic']}")
 
     else:
         st.error("No song found with that title. Please try again.")
@@ -63,4 +61,6 @@ df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(x.spl
 
 # Get the top 5 most common profane words
 top_5_profanities = profanity_counter.most_common(5)
+
+
 
