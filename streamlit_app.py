@@ -64,7 +64,3 @@ df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(x.spl
 # Get the top 5 most common profane words
 top_5_profanities = profanity_counter.most_common(5)
 
-# Display the top 5 profane words
-st.header("Top 5 Profane Words Across All Songs")
-for word, count in top_5_profanities:
-    st.text(f"{word}: {count} occurrences")
