@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from collections import Counter
+import ast
 
 # Load the dataset
 df = pd.read_csv('rap_songs_with_sentiment_updated.csv')
@@ -39,9 +40,11 @@ if search_query:
             st.text(f"Year: {song['year']}")
             st.text(f"Views: {song['views']:,}")
 
-            # Remove duplicates from the list of profane words
-            detected_profanity = set(song['profanity detected'].split())
-            st.text(f"Profane words detected: {', '.join(detected_profanity)}")
+            # Remove brackets, commas, and duplicates from the list of profane words
+            # Assuming the 'profanity detected' is a list-like string, e.g., "['word1', 'word2']"
+            detected_profanity = ast.literal_eval(song['profanity detected']) if song['profanity detected'].startswith('[') else song['profanity detected'].split()
+            detected_profanity = set(detected_profanity)  # Remove duplicates
+            st.text(f"Profane words detected: {' '.join(detected_profanity)}")
             st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
             rating = get_profanity_rating(song['profanity weighting (%)'], p25, p50, p75)
             st.text(f"Profanity rating: {rating}")
@@ -57,10 +60,15 @@ if search_query:
 profanity_counter = Counter()
 
 # Assuming "profanity detected" column contains a string of profane words separated by spaces
-df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(x.split()))
+df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(ast.literal_eval(x) if x.startswith('[') else x.split()))
 
 # Get the top 5 most common profane words
 top_5_profanities = profanity_counter.most_common(5)
+
+# Display the top 5 profane words
+st.header("Top 5 Profane Words Across All Songs")
+for word, count in top_5_profanities:
+    st.text(f"{word}: {count} occurrences")
 
 
 
