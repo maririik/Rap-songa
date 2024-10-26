@@ -2,8 +2,6 @@ import streamlit as st
 import pandas as pd
 from collections import Counter
 import ast
-import matplotlib.pyplot as plt
-import numpy as np
 
 # Load the dataset
 df = pd.read_csv('rap_songs_with_sentiment_updated.csv')
@@ -19,13 +17,10 @@ def get_profanity_rating(profanity_weighting, p25, p50, p75):
     else:
         return 'Very High profanity'
 
-# Calculate percentiles for profanity weighting and sentiment score
+# Calculate percentiles for profanity weighting
 p25 = df['profanity weighting (%)'].quantile(0.25)
 p50 = df['profanity weighting (%)'].quantile(0.50)
 p75 = df['profanity weighting (%)'].quantile(0.75)
-s25 = df['sentiment_score'].quantile(0.25)
-s50 = df['sentiment_score'].quantile(0.50)
-s75 = df['sentiment_score'].quantile(0.75)
 
 # Title of the app
 st.title("Rap Song Profanity & Sentiment Analyzer")
@@ -45,8 +40,10 @@ if search_query:
             st.text(f"Year: {song['year']}")
             st.text(f"Views: {song['views']:,}")
 
+            # Remove brackets, commas, and duplicates from the list of profane words
+            # Assuming the 'profanity detected' is a list-like string, e.g., "['word1', 'word2']"
             detected_profanity = ast.literal_eval(song['profanity detected']) if song['profanity detected'].startswith('[') else song['profanity detected'].split()
-            detected_profanity = set(detected_profanity)
+            detected_profanity = set(detected_profanity)  # Remove duplicates
             st.text(f"Profane words detected: {' '.join(detected_profanity)}")
             st.text(f"Profanity percentage: {song['profanity weighting (%)']}%")
             rating = get_profanity_rating(song['profanity weighting (%)'], p25, p50, p75)
@@ -56,33 +53,13 @@ if search_query:
             sentiment = "Positive" if song['sentiment_score'] > 0 else "Negative"
             st.text(f"Sentiment score: {song['sentiment_score']} ({sentiment})")
 
-            # Plot line chart for profanity weighting
-            plt.figure(figsize=(10, 4))
-            sorted_profanity = np.sort(df['profanity weighting (%)'])
-            plt.plot(sorted_profanity, label="All Songs")
-            plt.axvline(x=np.searchsorted(sorted_profanity, song['profanity weighting (%)']), color='red', linestyle='--', label=f"{song['title']} Profanity Level")
-            plt.xlabel("Songs (sorted by Profanity)")
-            plt.ylabel("Profanity Weighting (%)")
-            plt.title("Relative Profanity Percentage Across Songs")
-            plt.legend()
-            st.pyplot(plt)
-
-            # Plot line chart for sentiment score
-            plt.figure(figsize=(10, 4))
-            sorted_sentiment = np.sort(df['sentiment_score'])
-            plt.plot(sorted_sentiment, label="All Songs")
-            plt.axvline(x=np.searchsorted(sorted_sentiment, song['sentiment_score']), color='blue', linestyle='--', label=f"{song['title']} Sentiment Score")
-            plt.xlabel("Songs (sorted by Sentiment Score)")
-            plt.ylabel("Sentiment Score")
-            plt.title("Relative Sentiment Score Across Songs")
-            plt.legend()
-            st.pyplot(plt)
-
     else:
         st.error("No song found with that title. Please try again.")
 
 # Analyze profane words across all songs
 profanity_counter = Counter()
+
+# Assuming "profanity detected" column contains a string of profane words separated by spaces
 df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(ast.literal_eval(x) if x.startswith('[') else x.split()))
 
 # Get the top 5 most common profane words
