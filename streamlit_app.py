@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from collections import Counter
 import ast
-import matplotlib.pyplot as plt
+import matplotlib as plt
 import numpy as np
 
 # Load the dataset
