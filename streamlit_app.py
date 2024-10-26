@@ -41,7 +41,6 @@ if search_query:
             st.text(f"Views: {song['views']:,}")
 
             # Remove brackets, commas, and duplicates from the list of profane words
-            # Assuming the 'profanity detected' is a list-like string, e.g., "['word1', 'word2']"
             detected_profanity = ast.literal_eval(song['profanity detected']) if song['profanity detected'].startswith('[') else song['profanity detected'].split()
             detected_profanity = set(detected_profanity)  # Remove duplicates
             st.text(f"Profane words detected: {' '.join(detected_profanity)}")
@@ -53,13 +52,38 @@ if search_query:
             sentiment = "Positive" if song['sentiment_score'] > 0 else "Negative"
             st.text(f"Sentiment score: {song['sentiment_score']} ({sentiment})")
 
+            # Highlight searched song in the dataset
+            searched_profanity = song['profanity weighting (%)']
+            searched_sentiment = song['sentiment_score']
     else:
         st.error("No song found with that title. Please try again.")
 
+# Line chart for profanity percentage
+st.subheader("Profanity Percentage Across All Songs")
+df_sorted_profanity = df.sort_values(by='profanity weighting (%)').reset_index()
+profanity_chart_data = pd.DataFrame({
+    'Profanity %': df_sorted_profanity['profanity weighting (%)']
+})
+st.line_chart(profanity_chart_data)
+
+# Highlight the searched song on profanity chart if available
+if search_query and not song_data.empty:
+    st.text(f"Searched song's profanity percentage: {searched_profanity}%")
+
+# Line chart for sentiment score
+st.subheader("Sentiment Score Across All Songs")
+df_sorted_sentiment = df.sort_values(by='sentiment_score').reset_index()
+sentiment_chart_data = pd.DataFrame({
+    'Sentiment Score': df_sorted_sentiment['sentiment_score']
+})
+st.line_chart(sentiment_chart_data)
+
+# Highlight the searched song on sentiment chart if available
+if search_query and not song_data.empty:
+    st.text(f"Searched song's sentiment score: {searched_sentiment}")
+    
 # Analyze profane words across all songs
 profanity_counter = Counter()
-
-# Assuming "profanity detected" column contains a string of profane words separated by spaces
 df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(ast.literal_eval(x) if x.startswith('[') else x.split()))
 
 # Get the top 5 most common profane words
