@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 from collections import Counter
 import ast
-import altair as alt
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Load the dataset
 df = pd.read_csv('rap_songs_with_sentiment_updated.csv')
@@ -44,7 +45,6 @@ if search_query:
             st.text(f"Year: {song['year']}")
             st.text(f"Views: {song['views']:,}")
 
-            # Remove brackets, commas, and duplicates from the list of profane words
             detected_profanity = ast.literal_eval(song['profanity detected']) if song['profanity detected'].startswith('[') else song['profanity detected'].split()
             detected_profanity = set(detected_profanity)
             st.text(f"Profane words detected: {' '.join(detected_profanity)}")
@@ -56,43 +56,27 @@ if search_query:
             sentiment = "Positive" if song['sentiment_score'] > 0 else "Negative"
             st.text(f"Sentiment score: {song['sentiment_score']} ({sentiment})")
 
-            # Plot profanity weighting relative to all songs
-            profanity_chart = alt.Chart(df).mark_circle(size=60).encode(
-                x=alt.X('profanity weighting (%)', title='Profanity Weighting (%)'),
-                y=alt.Y('count()', title='Number of Songs'),
-                tooltip=['title', 'profanity weighting (%)']
-            ).properties(
-                width=600,
-                height=300,
-                title="Relative Profanity Percentage of Songs"
-            ).interactive()
+            # Plot line chart for profanity weighting
+            plt.figure(figsize=(10, 4))
+            sorted_profanity = np.sort(df['profanity weighting (%)'])
+            plt.plot(sorted_profanity, label="All Songs")
+            plt.axvline(x=np.searchsorted(sorted_profanity, song['profanity weighting (%)']), color='red', linestyle='--', label=f"{song['title']} Profanity Level")
+            plt.xlabel("Songs (sorted by Profanity)")
+            plt.ylabel("Profanity Weighting (%)")
+            plt.title("Relative Profanity Percentage Across Songs")
+            plt.legend()
+            st.pyplot(plt)
 
-            # Highlight the selected song's profanity score
-            highlight = alt.Chart(pd.DataFrame({'profanity weighting (%)': [song['profanity weighting (%)']]})).mark_rule(color='red').encode(
-                x='profanity weighting (%)'
-            )
-
-            # Display the profanity chart with highlight
-            st.altair_chart(profanity_chart + highlight)
-
-            # Plot sentiment score relative to all songs
-            sentiment_chart = alt.Chart(df).mark_circle(size=60).encode(
-                x=alt.X('sentiment_score', title='Sentiment Score'),
-                y=alt.Y('count()', title='Number of Songs'),
-                tooltip=['title', 'sentiment_score']
-            ).properties(
-                width=600,
-                height=300,
-                title="Relative Sentiment Score of Songs"
-            ).interactive()
-
-            # Highlight the selected song's sentiment score
-            sentiment_highlight = alt.Chart(pd.DataFrame({'sentiment_score': [song['sentiment_score']]})).mark_rule(color='blue').encode(
-                x='sentiment_score'
-            )
-
-            # Display the sentiment chart with highlight
-            st.altair_chart(sentiment_chart + sentiment_highlight)
+            # Plot line chart for sentiment score
+            plt.figure(figsize=(10, 4))
+            sorted_sentiment = np.sort(df['sentiment_score'])
+            plt.plot(sorted_sentiment, label="All Songs")
+            plt.axvline(x=np.searchsorted(sorted_sentiment, song['sentiment_score']), color='blue', linestyle='--', label=f"{song['title']} Sentiment Score")
+            plt.xlabel("Songs (sorted by Sentiment Score)")
+            plt.ylabel("Sentiment Score")
+            plt.title("Relative Sentiment Score Across Songs")
+            plt.legend()
+            st.pyplot(plt)
 
     else:
         st.error("No song found with that title. Please try again.")
