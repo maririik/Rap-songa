@@ -106,7 +106,6 @@ top_5_profanities = profanity_counter.most_common(5)
 st.header("Top 5 Profane Words Across All Songs")
 for word, count in top_5_profanities:
     st.text(f"{word}: {count} occurrences")
-
         return 'High profanity'
     else:
         return 'Very High profanity'
