@@ -7,17 +7,17 @@ import ast
 df = pd.read_csv('rap_songs_with_sentiment_updated.csv')
 
 # Function to get percentile-based profanity rating
+# Function to get percentile-based profanity rating
 def get_profanity_rating(profanity_weighting, p25, p50, p75):
     if profanity_weighting <= p25:
         return 'Low profanity'
     elif profanity_weighting <= p50:
         return 'Moderate profanity'
-    elif profanity_weighting <= p75:import streamlit as st
-import pandas as pd
-from collections import Counter
-import matplotlib.pyplot as plt
-import seaborn as sns
-import ast
+    elif profanity_weighting <= p75:
+        return 'High profanity'
+    else:
+        return 'Very High profanity'
+
 
 # Load the dataset
 df = pd.read_csv('rap_songs_with_sentiment_updated.csv')
