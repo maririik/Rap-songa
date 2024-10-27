@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 from collections import Counter
-import matplotlib.pyplot as plt
-import seaborn as sns
 import ast
 
 # Load the dataset
@@ -43,6 +41,7 @@ if search_query:
             st.text(f"Views: {song['views']:,}")
 
             # Remove brackets, commas, and duplicates from the list of profane words
+            # Assuming the 'profanity detected' is a list-like string, e.g., "['word1', 'word2']"
             detected_profanity = ast.literal_eval(song['profanity detected']) if song['profanity detected'].startswith('[') else song['profanity detected'].split()
             detected_profanity = set(detected_profanity)  # Remove duplicates
             st.text(f"Profane words detected: {' '.join(detected_profanity)}")
@@ -54,5 +53,19 @@ if search_query:
             sentiment = "Positive" if song['sentiment_score'] > 0 else "Negative"
             st.text(f"Sentiment score: {song['sentiment_score']} ({sentiment})")
 
-            # Create box plots for sentiment score and profanity weighting
-            fig
+    else:
+        st.error("No song found with that title. Please try again.")
+
+# Analyze profane words across all songs
+profanity_counter = Counter()
+
+# Assuming "profanity detected" column contains a string of profane words separated by spaces
+df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(ast.literal_eval(x) if x.startswith('[') else x.split()))
+
+# Get the top 5 most common profane words
+top_5_profanities = profanity_counter.most_common(5)
+
+# Display the top 5 profane words
+st.header("Top 5 Profane Words Across All Songs")
+for word, count in top_5_profanities:
+    st.text(f"{word}: {count} occurrences")
