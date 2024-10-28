@@ -21,7 +21,21 @@ p75 = df['profanity weighting (%)'].quantile(0.75)
 
 st.title("Rap Song Profanity & Sentiment Analyzer")
 
-search_query = st.text_input("Search for a rap song by title")
+search = st.text_input("Search for a rap song by title")
+
+st.markdown(
+    """
+    <style>
+    /* Apply inner shadow to the search bar */
+    .stTextInput > div > div > input {
+        box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2);
+        font-style: italic;
+        color: #999999;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 if search_query:
     song_data = df[df['title'].str.contains(search_query, case=False, na=False)]
