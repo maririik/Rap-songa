@@ -37,8 +37,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-if search_query:
-    song_data = df[df['title'].str.contains(search_query, case=False, na=False)]
+if search:
+    song_data = df[df['title'].str.contains(search, case=False, na=False)]
 
     if not song_data.empty:
         for index, song in song_data.iterrows():
