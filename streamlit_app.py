@@ -47,9 +47,4 @@ if search_query:
     else:
         st.error("No song found with that title. Please try again.")
 
-profanity_counter = Counter()
 
-df['profanity detected'].dropna().apply(lambda x: profanity_counter.update(ast.literal_eval(x) if x.startswith('[') else x.split()))
-
-
-    st.text(f"{word}: {count} occurrences")
