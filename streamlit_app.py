@@ -31,7 +31,7 @@ if search_query:
             st.subheader(f"Song: {song['title']}")
             st.text(f"Artist: {song['artist']}")
             st.text(f"Year: {song['year']}")
-            st.text(f"Views: {song['views']:,}")
+    
 
             detected_profanity = ast.literal_eval(song['profanity detected']) if song['profanity detected'].startswith('[') else song['profanity detected'].split()
             detected_profanity = set(detected_profanity)  # Remove duplicates
